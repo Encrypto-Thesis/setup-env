@@ -48,7 +48,6 @@ build: docker-up
 		-DENABLE_INSECURE_SILVER=ON -DLIBOTE_BUILD_TYPE=Release -DLIBOTE_BUILD_DIR=$$HOME/build/libOTe \
 		-DENABLE_RELIC=ON -DENABLE_SODIUM=OFF -DENABLE_BOOST=ON -DENABLE_OPENSSL=ON -DENABLE_CIRCUITS=ON -DENABLE_PIC=ON \
 		-DSODIUM_MONTGOMERY=false)
-# $(MK) --build-libsodium
 
 --clean-build-from-host:
 	rm -rf build/*
@@ -62,13 +61,6 @@ clean: docker-up
 	$(DC_EXEC) mkdir -p $$HOME/build/macoro
 	$(DC_EXEC) cmake -S /workspace/macoro -B $$HOME/build/macoro
 	$(DC_EXEC) cd $$HOME/build/macoro
-	
---build-libsodium:
-	$(DC_EXEC)  mkdir -p $$HOME/build/libsodium
-	$(DC_EXEC)  cp  /workspace/libsodium/configure  $$HOME/build/libsodium
-	$(DC_EXEC)  bash -c 'cd $$HOME/build/libsodium && \
-		./configure --srcdir=/workspace/libsodium && \
-		make && sudo make install'
 
 help:
 	@echo "Targets:"

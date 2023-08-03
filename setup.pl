@@ -56,7 +56,7 @@ sub download_deps {
         'bitpolymul'     => "https://github.com/ladnir/bitpolymul.git",
         'libdivide'      => "https://github.com/ridiculousfish/libdivide.git",
         'span-lite'      => "https://github.com/martinmoene/span-lite.git",
-        'libsodium'      => "https://github.com/jedisct1/libsodium.git", 
+        # 'libsodium'      => "https://github.com/jedisct1/libsodium.git", 
     );
 
     for(keys %pathes){
@@ -203,12 +203,52 @@ sub quirks {
             close($out);
         }
     }
+    sub fix_faulty_test {
+        my $cpp_file = "deps/libOTe/libOTe_Tests/ExConvCode_Tests.cpp";
+
+        my $call_to_disable = "code.accumulate<block, u8>";
+        
+        my @file_contents = ();
+        my $do_modify = 1;
+
+        open(my $in, '<', $cpp_file) or die error() . "Failed to open file \"$cpp_file\" for reading. Error is $!.\n";
+        while ( <$in> ) {
+            push @file_contents, $_;
+            if ($_ =~ /#if 0/) {
+                $do_modify = 0;
+                last;
+            }
+        }
+        close($in);
+
+        if ($do_modify) {
+            my $disable_current_line = 0;
+
+            open(my $out, '>', $cpp_file) or die error() . "Failed to open file \"$cpp_file\" for writing. Error is $!.\n";
+            foreach ( @file_contents ) {
+                if ($_ =~ /$call_to_disable/) {
+                    print $out "#if 0\n";
+                    $disable_current_line = 1;
+                }
+
+                print $out $_;
+                if ($disable_current_line) {
+                    if ($_ =~ /;/) {
+                        print $out "#endif\n";
+                        $disable_current_line = 0;
+                    }
+                }
+            }
+            close($out);
+        }
+    }
 
     disable_macoro_tests();
     disable_macoro_frontend();
     checkout_bit_poly_mul_tag();
     fix_includes();
     # fix_symbols();
+    fix_faulty_test();
 }
 
 sub main_sub {
