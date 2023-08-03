@@ -1,0 +1,18 @@
+version: '3.7'
+services:
+  dev:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile
+      args:
+        - MY_UID=${MY_UID}
+        - MY_GID=${MY_GID}
+        - MY_USER=${MY_USER}
+    command: sleep infinity
+    volumes:
+      - ../deps:/workspace:ro
+      - ../build:/home/${MY_USER}/build:rw
+    working_dir: /workspace
+    env_file: .env
+    user: ${MY_USER}
+
